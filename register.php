@@ -98,4 +98,4 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <a href="login.php" class="auth-link">Already have an account? Login here</a>
     </div>
 </body>
-</html>a
+</html>pl
