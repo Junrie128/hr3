@@ -57,7 +57,7 @@ $role = $_SESSION['role'] ?? 'schedule_officer';
       <div class="sidebar d-flex flex-column justify-content-between shadow-sm border-end">
         <div>
           <div class="d-flex justify-content-center align-items-center mb-5 mt-3">
-            <img src="./assets/images/image.png" class="img-fluid me-2" style="height: 55px;" alt="Logo">
+            <img src="../assets/images/image.png" class="img-fluid me-2" style="height: 55px;" alt="Logo">
           </div>
           <div class="mb-4">
             <h6 class="text-uppercase mb-2">Dashboard</h6>
@@ -80,7 +80,7 @@ $role = $_SESSION['role'] ?? 'schedule_officer';
           </div>
         </div>
         <div class="p-3 border-top mb-2">
-          <a class="nav-link text-danger" href="logout.php">
+          <a class="nav-link text-danger" href="../logout.php">
             <ion-icon name="log-out-outline"></ion-icon>Logout
           </a>
         </div>
@@ -90,7 +90,7 @@ $role = $_SESSION['role'] ?? 'schedule_officer';
       <div class="topbar">
         <span class="dashboard-title">Welcome back, <?= htmlspecialchars($fullname) ?>!</span>
         <div class="profile">
-          <img src="./assets/images/default-profile.png" class="profile-img" alt="Profile">
+          <img src="../assets/images/default-profile.png" class="profile-img" alt="Profile">
           <div class="profile-info">
             <strong><?= htmlspecialchars($fullname) ?></strong><br>
             <small><?= htmlspecialchars(ucfirst($role)) ?></small>

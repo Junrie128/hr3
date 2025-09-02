@@ -113,7 +113,7 @@ $role = $_SESSION['role'] ?? 'employee';
       <div class="topbar">
         <span class="dashboard-title">Welcome back, <?= htmlspecialchars($fullname) ?>!</span>
         <div class="profile">
-          <img src="./assets/images/default-profile.png" class="profile-img" alt="Profile">
+          <img src="../assets/images/default-profile.png" class="profile-img" alt="Profile">
           <div class="profile-info">
             <strong><?= htmlspecialchars($fullname) ?></strong><br>
             <small><?= htmlspecialchars(ucfirst($role)) ?></small>

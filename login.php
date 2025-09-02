@@ -7,19 +7,19 @@ if (isset($_SESSION['employee_id'])) {
     // Redirect user based on stored role
     switch ($_SESSION['role'] ?? '') {
         case 'hr_manager':
-            header("Location: /manager_dashboard.php");
+            header("Location: ./manager/manager_dashboard.php");
             break;
         case 'schedule_officer':
-            header("Location: /schedule_officer_dashboard.php");
+            header("Location: ./scheduler/schedule_officer_dashboard.php");
             break;
         case 'benefits_officer':
-            header("Location: /benefits_officer_dashboard.php");
+            header("Location: ./benefits/benefits_officer_dashboard.php");
             break;
         case 'admin':
-            header("Location: /admin_dashboard.php");
+            header("Location: ./admin/admin_dashboard.php");
             break;
         default:
-            header("Location: /employee/employee_dashboard.php");
+            header("Location: ./employee/employee_dashboard.php");
     }
     exit();
 }

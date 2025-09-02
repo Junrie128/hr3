@@ -86,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <div class="mb-4">
             <h6 class="text-uppercase mb-2">Dashboard</h6>
             <nav class="nav flex-column">
-              <a class="nav-link" href="/employee/employee_dashboard.php"><ion-icon name="home-outline"></ion-icon>Dashboard</a>
+              <a class="nav-link" href="../employee/employee_dashboard.php"><ion-icon name="home-outline"></ion-icon>Dashboard</a>
             </nav>
           </div>
           <div class="mb-4">
@@ -183,7 +183,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
               <?= ($todayLog && !empty($todayLog['time_out'])) ? 'Already Clocked Out' : 'Clock Out' ?>
           </button>
       </form>
-      <a href="/employee/attendance_logs.php" class="btn btn-outline-primary">View My Attendance Logs</a>
+      <a href="../employee/attendance_logs.php" class="btn btn-outline-primary">View My Attendance Logs</a>
     </div>
   </div>
 </div>
