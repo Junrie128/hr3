@@ -5,7 +5,7 @@ require_once("../includes/db.php");
 $fullname = $_SESSION['fullname'] ?? 'Schedule Officer';
 $role = $_SESSION['role'] ?? 'schedule_officer';
 
-// Handle add employee form submission (via modal)
+// Handle add employee form submission (with image upload)
 $msg = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_employee_modal'])) {
     $name = trim($_POST['fullname'] ?? '');
@@ -23,10 +23,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_employee_modal'])
     $status = $_POST['status'] ?? 'Active';
     $address = trim($_POST['address'] ?? '');
 
+    // Image upload logic
+    $profile_photo_path = "../assets/images/default-profile.png";
+    if (!empty($_FILES['profile_photo']['name'])) {
+        $target_dir = "../assets/images/profiles/";
+        if (!is_dir($target_dir)) mkdir($target_dir, 0755, true);
+        $file_ext = strtolower(pathinfo($_FILES["profile_photo"]["name"], PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        if (in_array($file_ext, $allowed)) {
+            $new_file_name = uniqid("profile_") . "." . $file_ext;
+            $upload_path = $target_dir . $new_file_name;
+            if (move_uploaded_file($_FILES["profile_photo"]["tmp_name"], $upload_path)) {
+                $profile_photo_path = $upload_path;
+            }
+        }
+    }
+
     if ($name && $username && $email && $password && $password === $conf_password) {
         $stmt = $pdo->prepare("INSERT INTO employees 
-            (fullname, username, email, password, role, job_title, contact_number, birthday, department, gender, date_joined, status, address) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            (fullname, username, email, password, role, job_title, contact_number, birthday, department, gender, date_joined, status, address, profile_photo) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $name,
             $username,
@@ -40,7 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_employee_modal'])
             $gender,
             $date_joined,
             $status,
-            $address
+            $address,
+            $profile_photo_path
         ]);
         $msg = "Employee added successfully!";
     } else {
@@ -48,16 +65,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_employee_modal'])
     }
 }
 
-// Demo profile images (replace with real uploads in production)
-$profile_images = [
-    1 => "../assets/images/profile1.jpg",
-    2 => "../assets/images/profile2.jpg",
-    3 => "../assets/images/profile3.jpg",
-    4 => "../assets/images/profile4.jpg",
-    5 => "../assets/images/profile5.jpg",
-    6 => "../assets/images/profile6.jpg",
-    7 => "../assets/images/profile7.jpg"
-];
+// Handle employee edit/save (AJAX)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_employee_modal'])) {
+    $id = intval($_POST['id']);
+    $name = trim($_POST['fullname']);
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $role_emp = $_POST['role'];
+    $job_title = trim($_POST['job_title']);
+    $contact_number = trim($_POST['contact_number']);
+    $birthday = trim($_POST['birthday']);
+    $department = trim($_POST['department']);
+    $gender = trim($_POST['gender']);
+    $date_joined = trim($_POST['date_joined']);
+    $status = $_POST['status'];
+    $address = trim($_POST['address']);
+    // Handle image upload for edit
+    $profile_photo_update = "";
+    $profile_photo_path = "";
+    if (!empty($_FILES['profile_photo']['name'])) {
+        $target_dir = "../assets/images/profiles/";
+        if (!is_dir($target_dir)) mkdir($target_dir, 0755, true);
+        $file_ext = strtolower(pathinfo($_FILES["profile_photo"]["name"], PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        if (in_array($file_ext, $allowed)) {
+            $new_file_name = uniqid("profile_") . "." . $file_ext;
+            $upload_path = $target_dir . $new_file_name;
+            if (move_uploaded_file($_FILES["profile_photo"]["tmp_name"], $upload_path)) {
+                $profile_photo_path = $upload_path;
+                $profile_photo_update = ", profile_photo = ?";
+            }
+        }
+    }
+    // Password update is optional
+    $update_pass = "";
+    $params = [
+        $name,
+        $username,
+        $email,
+        $role_emp,
+        $job_title,
+        $contact_number,
+        $birthday,
+        $department,
+        $gender,
+        $date_joined,
+        $status,
+        $address
+    ];
+    if (!empty($_POST['password'])) {
+        $update_pass = ", password = ?";
+        $params[] = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    }
+    if ($profile_photo_update) {
+        $params[] = $profile_photo_path;
+    }
+    $params[] = $id;
+    $stmt = $pdo->prepare("UPDATE employees SET fullname=?, username=?, email=?, role=?, job_title=?, contact_number=?, birthday=?, department=?, gender=?, date_joined=?, status=?, address=?{$update_pass}{$profile_photo_update} WHERE id=?");
+    $stmt->execute($params);
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+// Helper for profile image
+function getProfileImage($emp) {
+    if (!empty($emp['profile_photo']) && file_exists($emp['profile_photo'])) {
+        return $emp['profile_photo'];
+    }
+    return "../assets/images/default_image.jpg";
+}
 
 // Search/filter
 $search = trim($_GET['search'] ?? '');
@@ -67,7 +143,7 @@ if ($search) {
     $where = 'WHERE fullname LIKE ? OR username LIKE ? OR email LIKE ?';
     $params = ["%$search%", "%$search%", "%$search%"];
 }
-$stmt = $pdo->prepare("SELECT id, fullname, username, email, role, job_title, contact_number, birthday, department, gender, date_joined, status, address FROM employees $where ORDER BY id DESC");
+$stmt = $pdo->prepare("SELECT id, fullname, username, email, role, job_title, contact_number, birthday, department, gender, date_joined, status, address, profile_photo FROM employees $where ORDER BY id DESC");
 $stmt->execute($params);
 $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -126,6 +202,10 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .btn-save { background: #4caf50; color: #fff; }
         .btn-cancel { background: #f44336; color: #fff; }
         .alert-info { border-radius: 10px; }
+        .modal-success { display:none; position:fixed; z-index:99999; background:rgba(0,0,0,0.25); top:0; left:0; width:100vw; height:100vh; align-items:center; justify-content:center; }
+        .modal-success .box { background:#fff; border-radius:18px; padding:2.5rem 3.5rem; box-shadow:0 2px 18px rgba(140,140,200,0.15); text-align:center; }
+        .modal-success .box ion-icon { font-size:3rem; color:#4caf50; margin-bottom:0.7rem; }
+        .modal-success .box .title { font-size:1.4rem; font-weight:700; margin-bottom:0.7rem;}
     </style>
 </head>
 <body>
@@ -140,13 +220,14 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div class="mb-4">
             <h6 class="text-uppercase mb-2">Dashboard</h6>
             <nav class="nav flex-column">
-              <a class="nav-link" href="schedule_officer_dashboard.php"><ion-icon name="home-outline"></ion-icon>Dashboard</a>
+              <a class="nav-link active" href="schedule_officer_dashboard.php"><ion-icon name="home-outline"></ion-icon>Dashboard</a>
             </nav>
           </div>
           <div class="mb-4">
             <h6 class="text-uppercase px-2 mb-2">Employee Management</h6>
             <nav class="nav flex-column">
-              <a class="nav-link active" href="employee_management.php"><ion-icon name="people-outline"></ion-icon>Employee List</a>
+              <a class="nav-link" href="../scheduler/employee_management.php"><ion-icon name="people-outline"></ion-icon>Employee List</a>
+              <a class="nav-link" href="../scheduler/employee_list.php"><ion-icon name="people-outline"></ion-icon>Employee List</a>
             </nav>
           </div>
           <div class="mb-4">
@@ -164,7 +245,9 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </div>
         </div>
         <div class="p-3 border-top mb-2">
-          <a class="nav-link text-danger" href="../logout.php"><ion-icon name="log-out-outline"></ion-icon>Logout</a>
+          <a class="nav-link text-danger" href="../logout.php">
+            <ion-icon name="log-out-outline"></ion-icon>Logout
+          </a>
         </div>
       </div>
     </div>
@@ -197,33 +280,34 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <?php if ($msg): ?>
         <div class="alert alert-info"><?= htmlspecialchars($msg) ?></div>
       <?php endif; ?>
-      <div class="employee-cards-row">
+      <div class="employee-cards-row" id="employeeCardsRow">
         <?php foreach ($employees as $emp): ?>
-          <div class="employee-card">
+          <div class="employee-card" id="employeeCard<?= $emp['id'] ?>">
             <div class="employee-card-header"></div>
-            <div class="employee-card-edit" data-bs-toggle="modal" data-bs-target="#editEmployeeModal<?= $emp['id'] ?>">
+            <div class="employee-card-edit" onclick="showEditModal(<?= $emp['id'] ?>)">
               <ion-icon name="create-outline"></ion-icon>
             </div>
-            <img src="<?= $profile_images[$emp['id']] ?? '../assets/images/default-profile.png' ?>" class="employee-card-img" alt="Profile">
+            <img src="<?= htmlspecialchars(getProfileImage($emp)) ?>" class="employee-card-img" alt="Profile">
             <div class="employee-card-name"><?= htmlspecialchars($emp['fullname']) ?></div>
             <div class="employee-card-job"><?= htmlspecialchars($emp['job_title']) ?></div>
             <div class="employee-card-role"><?= htmlspecialchars(ucfirst($emp['role'])) ?></div>
             <div class="employee-card-email"><?= htmlspecialchars($emp['email']) ?></div>
             <div class="employee-card-contact"><?= htmlspecialchars($emp['contact_number']) ?></div>
           </div>
-          <!-- Edit Modal Template (Demo/UI only) -->
+          <!-- Edit Modal Template (AJAX) -->
           <div class="modal fade" id="editEmployeeModal<?= $emp['id'] ?>" tabindex="-1">
             <div class="modal-dialog">
-              <form class="modal-content">
+              <form class="modal-content" enctype="multipart/form-data" onsubmit="return saveEditEmployee(event, <?= $emp['id'] ?>)">
                 <div class="modal-header">
                   <h5 class="modal-title">Employee Details</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body row g-3">
+                  <input type="hidden" name="edit_employee_modal" value="1">
+                  <input type="hidden" name="id" value="<?= $emp['id'] ?>">
                   <div class="col-md-4">
-                    <img src="<?= $profile_images[$emp['id']] ?? '../assets/images/default-profile.png' ?>" class="form-img-preview" alt="Profile">
-                    <input type="file" class="form-control mb-2" id="profile_photo" name="profile_photo" style="font-size:0.95rem;">
-                    <button type="button" class="btn btn-sm btn-secondary w-100">Browse</button>
+                    <img src="<?= htmlspecialchars(getProfileImage($emp)) ?>" class="form-img-preview" id="editProfilePreview<?= $emp['id'] ?>" alt="Profile">
+                    <input type="file" class="form-control mb-2" id="profile_photo<?= $emp['id'] ?>" name="profile_photo" accept="image/*" onchange="previewEditProfileImage(event,<?= $emp['id'] ?>)">
                   </div>
                   <div class="col-md-8">
                     <div class="row g-2">
@@ -233,51 +317,69 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
                       </div>
                       <div class="col-6">
                         <label>Name</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($emp['fullname']) ?>">
+                        <input type="text" class="form-control" name="fullname" value="<?= htmlspecialchars($emp['fullname']) ?>">
                       </div>
                       <div class="col-6">
                         <label>Job Title</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($emp['job_title']) ?>">
+                        <input type="text" class="form-control" name="job_title" value="<?= htmlspecialchars($emp['job_title']) ?>">
                       </div>
                       <div class="col-6">
                         <label>Email</label>
-                        <input type="email" class="form-control" value="<?= htmlspecialchars($emp['email']) ?>">
+                        <input type="email" class="form-control" name="email" value="<?= htmlspecialchars($emp['email']) ?>">
                       </div>
                       <div class="col-6">
                         <label>Contact Number</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($emp['contact_number']) ?>">
+                        <input type="text" class="form-control" name="contact_number" value="<?= htmlspecialchars($emp['contact_number']) ?>">
                       </div>
                       <div class="col-6">
                         <label>Birthday</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($emp['birthday']) ?>">
+                        <input type="date" class="form-control" name="birthday" value="<?= htmlspecialchars($emp['birthday']) ?>">
                       </div>
                       <div class="col-6">
                         <label>Department</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($emp['department']) ?>">
+                        <input type="text" class="form-control" name="department" value="<?= htmlspecialchars($emp['department']) ?>">
                       </div>
                       <div class="col-6">
                         <label>Gender</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($emp['gender']) ?>">
+                        <select class="form-select" name="gender">
+                          <option <?= $emp['gender'] == 'Male' ? 'selected' : '' ?>>Male</option>
+                          <option <?= $emp['gender'] == 'Female' ? 'selected' : '' ?>>Female</option>
+                          <option <?= $emp['gender'] == 'Other' ? 'selected' : '' ?>>Other</option>
+                        </select>
                       </div>
                       <div class="col-6">
                         <label>Date of Joining</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($emp['date_joined']) ?>">
+                        <input type="date" class="form-control" name="date_joined" value="<?= htmlspecialchars($emp['date_joined']) ?>">
                       </div>
                       <div class="col-6">
                         <label>Status</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($emp['status']) ?>">
+                        <select class="form-select" name="status">
+                          <option <?= $emp['status'] == 'Active' ? 'selected' : '' ?>>Active</option>
+                          <option <?= $emp['status'] == 'Inactive' ? 'selected' : '' ?>>Inactive</option>
+                        </select>
                       </div>
-                      <div class="col-12">
-                        <label>Address</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($emp['address']) ?>">
+                      <div class="col-6">
+                        <label>Password</label>
+                        <input type="password" class="form-control" name="password" value="">
+                        <small class="text-muted">Leave blank if not changing</small>
                       </div>
                       <div class="col-6">
                         <label>Role</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($emp['role']) ?>">
+                        <select class="form-select" name="role">
+                          <option <?= $emp['role']=='Employee'?'selected':'' ?>>Employee</option>
+                          <option <?= $emp['role']=='Schedule Officer'?'selected':'' ?>>Schedule Officer</option>
+                          <option <?= $emp['role']=='HR Manager'?'selected':'' ?>>HR Manager</option>
+                          <option <?= $emp['role']=='Admin'?'selected':'' ?>>Admin</option>
+                          <option <?= $emp['role']=='Other'?'selected':'' ?>>Other</option>
+                        </select>
                       </div>
                       <div class="col-6">
                         <label>Username</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($emp['username']) ?>">
+                        <input type="text" class="form-control" name="username" value="<?= htmlspecialchars($emp['username']) ?>">
+                      </div>
+                      <div class="col-12">
+                        <label>Address</label>
+                        <input type="text" class="form-control" name="address" value="<?= htmlspecialchars($emp['address']) ?>">
                       </div>
                     </div>
                   </div>
@@ -297,10 +399,18 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </div>
 </div>
+<!-- Success Modal -->
+<div class="modal-success" id="successModal">
+  <div class="box">
+    <ion-icon name="checkmark-circle-outline"></ion-icon>
+    <div class="title">Employee Updated Successfully!</div>
+    <button onclick="closeSuccessModal()" class="btn btn-success">OK</button>
+  </div>
+</div>
 <!-- Add Employee Modal -->
 <div class="modal fade" id="addEmployeeModal" tabindex="-1">
   <div class="modal-dialog">
-    <form method="post" class="modal-content">
+    <form method="post" enctype="multipart/form-data" class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Employee Details</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -308,9 +418,8 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <div class="modal-body row g-3">
         <input type="hidden" name="add_employee_modal" value="1">
         <div class="col-md-4">
-          <img src="../assets/images/default-profile.png" class="form-img-preview" alt="Profile">
-          <input type="file" class="form-control mb-2" id="profile_photo" name="profile_photo" style="font-size:0.95rem;">
-          <button type="button" class="btn btn-sm btn-secondary w-100">Browse</button>
+          <img src="../assets/images/default-profile.png" class="form-img-preview" id="addProfilePreview" alt="Profile">
+          <input type="file" class="form-control mb-2" id="profile_photo_add" name="profile_photo" accept="image/*" onchange="previewProfileImage(event)">
         </div>
         <div class="col-md-8">
           <div class="row g-2">
@@ -387,5 +496,71 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function showEditModal(id) {
+    var modalId = "#editEmployeeModal" + id;
+    var modal = new bootstrap.Modal(document.querySelector(modalId));
+    modal.show();
+}
+
+// AJAX edit and save
+function saveEditEmployee(e, id) {
+    e.preventDefault();
+    var modalId = "#editEmployeeModal" + id;
+    var form = document.querySelector(modalId + " form");
+    var formData = new FormData(form);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "employee_management.php", true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if(xhr.status === 200) {
+                try {
+                    var res = JSON.parse(xhr.responseText);
+                    if(res.success) {
+                        document.querySelector(modalId).classList.remove("show");
+                        document.querySelector(modalId).style.display = "none";
+                        document.body.classList.remove("modal-open");
+                        document.querySelector(".modal-backdrop").remove();
+                        showSuccessModal();
+                        setTimeout(function(){ location.reload(); }, 1200);
+                    }
+                } catch(e){}
+            }
+        }
+    };
+    xhr.send(formData);
+    return false;
+}
+
+function showSuccessModal() {
+    document.getElementById("successModal").style.display = "flex";
+}
+function closeSuccessModal() {
+    document.getElementById("successModal").style.display = "none";
+}
+
+// Preview image on add modal
+function previewProfileImage(e) {
+    const input = e.target;
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            document.getElementById('addProfilePreview').src = evt.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+// Preview image on edit modal
+function previewEditProfileImage(e, id) {
+    const input = e.target;
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            document.getElementById('editProfilePreview'+id).src = evt.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 </body>
 </html>
