@@ -75,9 +75,9 @@ $role = $_SESSION['role'] ?? 'employee';
           <div class="mb-4">
             <h6 class="text-uppercase px-2 mb-2">Leave Management</h6>
             <nav class="nav flex-column">
-              <a class="nav-link" href="/employee/leave_request.php"><ion-icon name="calendar-outline"></ion-icon>Request Leave</a>
-              <a class="nav-link" href="/employee/leave_balance.php"><ion-icon name="calendar-outline"></ion-icon>Leave Balance</a>
-              <a class="nav-link" href="/employee/leave_history.php"><ion-icon name="calendar-outline"></ion-icon>Leave History</a>
+              <a class="nav-link" href="../employee/leave_requests.php"><ion-icon name="calendar-outline"></ion-icon>Request Leave</a>
+              <a class="nav-link" href="../employee/leave_balance.php"><ion-icon name="calendar-outline"></ion-icon>Leave Balance</a>
+              <a class="nav-link" href="../employee/leave_history.php"><ion-icon name="calendar-outline"></ion-icon>Leave History</a>
             </nav>
           </div>
           <div class="mb-4">
@@ -120,7 +120,7 @@ $role = $_SESSION['role'] ?? 'employee';
           </div>
         </div>
       </div>
-      <div class="breadcrumbs text-end mb-2">Dashboard &gt; Home</div>
+      
       <div class="stats-cards">
         <div class="stats-card">
           <div class="icon"><ion-icon name="timer-outline"></ion-icon></div>

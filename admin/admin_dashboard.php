@@ -100,6 +100,7 @@ $role = $_SESSION['role'] ?? 'admin';
             <h6 class="text-uppercase px-2 mb-2">Leave Management</h6>
             <nav class="nav flex-column">
               <a class="nav-link" href="#"><ion-icon name="calendar-outline"></ion-icon>Leave Requests</a>
+              <a class="nav-link" href="../admin/leave_types.php"><ion-icon name="settings-outline"></ion-icon>Types of leave</a>
               <a class="nav-link" href="#"><ion-icon name="checkmark-done-outline"></ion-icon>Leave Approval</a>
               <a class="nav-link" href="#"><ion-icon name="calendar-outline"></ion-icon>Leave Balance</a>
               <a class="nav-link" href="#"><ion-icon name="calendar-outline"></ion-icon>Leave History</a>
@@ -147,7 +148,7 @@ $role = $_SESSION['role'] ?? 'admin';
           </div>
         </div>
       </div>
-      <div class="breadcrumbs text-end mb-2">Dashboard &gt; Home</div>
+
       <div class="stats-cards">
         <div class="stats-card">
           <div class="icon"><ion-icon name="people-outline"></ion-icon></div>

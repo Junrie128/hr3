@@ -11,28 +11,16 @@ $employee_id = $_SESSION['employee_id'];
 $fullname = $_SESSION['fullname'] ?? 'Employee';
 $role = $_SESSION['role'] ?? 'employee';
 
-// Handle form submission
-$msg = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $leave_type = $_POST['leave_type'] ?? '';
-    $date_from = $_POST['date_from'] ?? '';
-    $date_to = $_POST['date_to'] ?? '';
-    $reason = $_POST['reason'] ?? '';
-
-    if ($leave_type && $date_from && $date_to && $reason) {
-        $stmt = $pdo->prepare("INSERT INTO leave_requests (employee_id, leave_type, date_from, date_to, reason, status, requested_at) VALUES (?, ?, ?, ?, ?, 'pending', NOW())");
-        $stmt->execute([$employee_id, $leave_type, $date_from, $date_to, $reason]);
-        $msg = "Leave request submitted!";
-    } else {
-        $msg = "Please fill all required fields.";
-    }
-}
+// Fetch leave history
+$stmt = $pdo->prepare("SELECT * FROM leave_requests WHERE employee_id = ? ORDER BY requested_at DESC");
+$stmt->execute([$employee_id]);
+$leaves = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Request Leave - Employee | ViaHale TNVS HR3</title>
+    <title>Leave History - Employee | ViaHale TNVS HR3</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
@@ -53,19 +41,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .topbar .profile-info small { color: #6c757d; font-size: 0.93rem; }
         .dashboard-title { font-family: 'QuickSand', 'Poppins', Arial, sans-serif; font-size: 1.7rem; font-weight: 700; margin-bottom: 1.2rem; color: #22223b; }
         .breadcrumbs { color: #9A66ff; font-size: 0.98rem; text-align: right; }
-        .dashboard-row { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-        .dashboard-col { background: #fff; border-radius: 18px; box-shadow: 0 2px 8px rgba(140, 140, 200, 0.07); padding: 1.5rem 1.2rem; flex: 1; min-width: 0; min-width: 320px; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 1rem; border: 1px solid #f0f0f0; }
+        .dashboard-col { background: #fff; border-radius: 18px; box-shadow: 0 2px 8px rgba(140, 140, 200, 0.07); padding: 1.5rem 1.2rem; flex: 1; min-width: 0; margin: 2rem auto 1rem auto; max-width: 900px; display: flex; flex-direction: column; gap: 1rem; border: 1px solid #f0f0f0; }
         .dashboard-col h5 { font-family: 'QuickSand', 'Poppins', Arial, sans-serif; font-size: 1.13rem; font-weight: 600; margin-bottom: 1.1rem; color: #22223b; }
-        .form-label { font-weight: 600; color: #4311a5; }
-        .form-control, .form-select { border-radius: 8px; }
-        .btn-primary {
-            background: linear-gradient(90deg, #9A66ff 0%, #4311a5 100%);
-            border: none;
-            font-weight: 600;
-            border-radius: 8px;
-        }
-        .alert-success { background: #dbeafe; color: #2563eb; border-radius: 12px; }
-        .alert-danger { background: #fee2e2; color: #b91c1c; border-radius: 12px; }
+        .table { font-size: 0.98rem; color: #22223b; background: #fff; }
+        .table th { color: #6c757d; font-weight: 600; border: none; background: transparent; }
+        .table td { border: none; background: transparent; }
         .status-badge.approved, .status-badge.success { background: #dbeafe; color: #2563eb; }
         .status-badge.pending { background: #fff3cd; color: #856404; }
         .status-badge.rejected, .status-badge.danger { background: #fee2e2; color: #b91c1c; }
@@ -101,9 +81,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="mb-4">
             <h6 class="text-uppercase px-2 mb-2">Leave Management</h6>
             <nav class="nav flex-column">
-              <a class="nav-link active" href="../employee/leave_request.php"><ion-icon name="calendar-outline"></ion-icon>Request Leave</a>
+              <a class="nav-link" href="../employee/leave_requests.php"><ion-icon name="calendar-outline"></ion-icon>Request Leave</a>
               <a class="nav-link" href="../employee/leave_balance.php"><ion-icon name="calendar-outline"></ion-icon>Leave Balance</a>
-              <a class="nav-link" href="../employee/leave_history.php"><ion-icon name="calendar-outline"></ion-icon>Leave History</a>
+              <a class="nav-link active" href="../employee/leave_history.php"><ion-icon name="calendar-outline"></ion-icon>Leave History</a>
             </nav>
           </div>
           <div class="mb-4">
@@ -137,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <div class="main-content col" style="margin-left:220px;">
       <div class="topbar">
-        <span class="dashboard-title">Request Leave</span>
+        <span class="dashboard-title">Leave History</span>
         <div class="profile">
           <img src="../assets/images/default-profile.png" class="profile-img" alt="Profile">
           <div class="profile-info">
@@ -147,36 +127,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
       </div>
       
-      <div class="dashboard-col" style="max-width:520px; margin:auto;">
-        <h5 class="mb-3 text-center">Leave Request Form</h5>
-        <?php if ($msg): ?>
-            <div class="alert <?= strpos($msg, 'submitted') !== false ? 'alert-success' : 'alert-danger' ?>"><?= htmlspecialchars($msg) ?></div>
-        <?php endif; ?>
-        <form method="post" autocomplete="off">
-          <div class="mb-3">
-              <label for="leave_type" class="form-label">Leave Type</label>
-              <select class="form-select" id="leave_type" name="leave_type" required>
-                  <option value="">Select...</option>
-                  <option value="Vacation">Vacation Leave</option>
-                  <option value="Sick">Sick Leave</option>
-                  <option value="Emergency">Emergency Leave</option>
-                  <option value="Unpaid">Unpaid Leave</option>
-              </select>
-          </div>
-          <div class="mb-3">
-              <label for="date_from" class="form-label">From</label>
-              <input type="date" class="form-control" id="date_from" name="date_from" required>
-          </div>
-          <div class="mb-3">
-              <label for="date_to" class="form-label">To</label>
-              <input type="date" class="form-control" id="date_to" name="date_to" required>
-          </div>
-          <div class="mb-3">
-              <label for="reason" class="form-label">Reason</label>
-              <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Submit Request</button>
-        </form>
+      <div class="dashboard-col">
+        <h5>Your Leave History</h5>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Date From</th>
+              <th>Date To</th>
+              <th>Days</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Requested At</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($leaves as $leave): ?>
+            <tr>
+              <td><?= htmlspecialchars($leave['leave_type']) ?></td>
+              <td><?= htmlspecialchars($leave['date_from']) ?></td>
+              <td><?= htmlspecialchars($leave['date_to']) ?></td>
+              <td>
+                <?php
+                  $days = (strtotime($leave['date_to']) - strtotime($leave['date_from'])) / 86400 + 1;
+                  echo $days > 0 ? $days : 1;
+                ?>
+              </td>
+              <td><?= htmlspecialchars($leave['reason']) ?></td>
+              <td>
+                <?php
+                  $status = strtolower($leave['status']);
+                  $badge = 'pending';
+                  if ($status === 'approved') $badge = 'approved';
+                  elseif ($status === 'rejected') $badge = 'rejected';
+                  elseif ($status === 'success') $badge = 'success';
+                ?>
+                <span class="status-badge <?= $badge ?>">
+                  <?= htmlspecialchars(ucfirst($leave['status'])) ?>
+                </span>
+              </td>
+              <td><?= htmlspecialchars(date("Y-m-d H:i", strtotime($leave['requested_at']))) ?></td>
+            </tr>
+            <?php endforeach; ?>
+            <?php if (empty($leaves)): ?>
+              <tr><td colspan="7" class="text-center">No leave requests found.</td></tr>
+            <?php endif; ?>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

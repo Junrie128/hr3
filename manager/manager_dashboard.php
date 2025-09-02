@@ -70,16 +70,18 @@ $role = $_SESSION['role'] ?? 'hr_manager';
           <div class="mb-4">
             <h6 class="text-uppercase px-2 mb-2">Timesheet Management</h6>
             <nav class="nav flex-column">
-              <a class="nav-link" href="#"><ion-icon name="checkmark-done-outline"></ion-icon>Timesheet Review & Approval</a>
-              <a class="nav-link" href="#"><ion-icon name="document-text-outline"></ion-icon>Timesheet Reports</a>
+              <a class="nav-link" href="../manager/timesheet_review.php"><ion-icon name="checkmark-done-outline"></ion-icon>Timesheet Review & Approval</a>
+              <a class="nav-link" href="../manager/timesheet_reports.php"><ion-icon name="document-text-outline"></ion-icon>Timesheet Reports</a>
             </nav>
           </div>
           <div class="mb-4">
             <h6 class="text-uppercase px-2 mb-2">Leave Management</h6>
             <nav class="nav flex-column">
-              <a class="nav-link" href="#"><ion-icon name="calendar-outline"></ion-icon>Leave Requests</a>
-              <a class="nav-link" href="#"><ion-icon name="calendar-outline"></ion-icon>Leave Balance</a>
-              <a class="nav-link" href="#"><ion-icon name="calendar-outline"></ion-icon>Leave History</a>
+              <a class="nav-link" href="../manager/leave_requests.php"><ion-icon name="calendar-outline"></ion-icon>Leave Requests</a>
+              <a class="nav-link" href="../manager/leave_balance.php"><ion-icon name="calendar-outline"></ion-icon>Leave Balance</a>
+              <a class="nav-link" href="../manager/leave_history.php"><ion-icon name="calendar-outline"></ion-icon>Leave History</a>
+              <a class="nav-link" href="../manager/leave_types.php"><ion-icon name="settings-outline"></ion-icon>Types of leave</a>
+              <a class="nav-link" href="../manager/leave_calendar.php"><ion-icon name="calendar-outline"></ion-icon>Leave Calendar</a>
             </nav>
           </div>
           <div class="mb-4">
@@ -121,7 +123,7 @@ $role = $_SESSION['role'] ?? 'hr_manager';
           </div>
         </div>
       </div>
-      <div class="breadcrumbs text-end mb-2">Dashboard &gt; Home</div>
+
       <div class="stats-cards">
         <div class="stats-card">
           <div class="icon"><ion-icon name="document-text-outline"></ion-icon></div>

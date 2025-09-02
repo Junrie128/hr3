@@ -95,7 +95,7 @@ $role = $_SESSION['role'] ?? 'benefits_officer';
           </div>
         </div>
       </div>
-      <div class="breadcrumbs text-end mb-2">Dashboard &gt; Home</div>
+      
       <div class="stats-cards">
         <div class="stats-card">
           <div class="icon"><ion-icon name="cash-outline"></ion-icon></div>

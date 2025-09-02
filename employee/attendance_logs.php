@@ -128,9 +128,9 @@ foreach ($logs as $log) {
           <div class="mb-4">
             <h6 class="text-uppercase px-2 mb-2">Leave Management</h6>
             <nav class="nav flex-column">
-              <a class="nav-link" href="/employee/leave_request.php"><ion-icon name="calendar-outline"></ion-icon>Request Leave</a>
-              <a class="nav-link" href="/employee/leave_balance.php"><ion-icon name="calendar-outline"></ion-icon>Leave Balance</a>
-              <a class="nav-link" href="/employee/leave_history.php"><ion-icon name="calendar-outline"></ion-icon>Leave History</a>
+              <a class="nav-link" href="../employee/leave_requests.php"><ion-icon name="calendar-outline"></ion-icon>Request Leave</a>
+              <a class="nav-link" href="../employee/leave_balance.php"><ion-icon name="calendar-outline"></ion-icon>Leave Balance</a>
+              <a class="nav-link" href="../employee/leave_history.php"><ion-icon name="calendar-outline"></ion-icon>Leave History</a>
             </nav>
           </div>
           <div class="mb-4">
@@ -173,7 +173,7 @@ foreach ($logs as $log) {
           </div>
         </div>
       </div>
-      <div class="breadcrumbs text-end mb-2"><a href="employee_dashboard.php">Dashboard</a> &gt; <a href="attendance.php">Time & Attendance</a> &gt; Attendance Logs</div>
+      
       <a href="/employee/attendance.php" class="btn btn-outline-secondary mb-3">&larr; Back to Attendance</a>
 
       <?php if (!empty($submitted_message)): ?>

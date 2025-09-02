@@ -99,9 +99,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <div class="mb-4">
             <h6 class="text-uppercase px-2 mb-2">Leave Management</h6>
             <nav class="nav flex-column">
-              <a class="nav-link" href="/employee/leave_request.php"><ion-icon name="calendar-outline"></ion-icon>Request Leave</a>
-              <a class="nav-link" href="/employee/leave_balance.php"><ion-icon name="calendar-outline"></ion-icon>Leave Balance</a>
-              <a class="nav-link" href="/employee/leave_history.php"><ion-icon name="calendar-outline"></ion-icon>Leave History</a>
+              <a class="nav-link" href="../employee/leave_requests.php"><ion-icon name="calendar-outline"></ion-icon>Request Leave</a>
+              <a class="nav-link" href="../employee/leave_balance.php"><ion-icon name="calendar-outline"></ion-icon>Leave Balance</a>
+              <a class="nav-link" href="../employee/leave_history.php"><ion-icon name="calendar-outline"></ion-icon>Leave History</a>
             </nav>
           </div>
           <div class="mb-4">
@@ -127,7 +127,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           </div>
         </div>
         <div class="p-3 border-top mb-2">
-          <a class="nav-link text-danger" href="/logout.php">
+          <a class="nav-link text-danger" href="../logout.php">
             <ion-icon name="log-out-outline"></ion-icon>Logout
           </a>
         </div>
@@ -144,8 +144,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           </div>
         </div>
       </div>
-      <div class="breadcrumbs text-end mb-2"><a href="employee_dashboard.php">Dashboard</a> &gt; Time & Attendance</div>
-      <?php if ($message): ?>
+      
         <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
       <?php endif; ?>
       <div class="info-box mb-3">
