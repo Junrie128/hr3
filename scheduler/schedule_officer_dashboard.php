@@ -62,7 +62,14 @@ $role = $_SESSION['role'] ?? 'schedule_officer';
           <div class="mb-4">
             <h6 class="text-uppercase mb-2">Dashboard</h6>
             <nav class="nav flex-column">
-              <a class="nav-link active" href="#"><ion-icon name="home-outline"></ion-icon>Dashboard</a>
+              <a class="nav-link active" href="schedule_officer_dashboard.php"><ion-icon name="home-outline"></ion-icon>Dashboard</a>
+            </nav>
+          </div>
+          <div class="mb-4">
+            <h6 class="text-uppercase px-2 mb-2">Employee Management</h6>
+            <nav class="nav flex-column">
+              <a class="nav-link" href="../scheduler/employee_management.php"><ion-icon name="people-outline"></ion-icon>Employee List</a>
+              <a class="nav-link" href="../scheduler/employee_list.php"><ion-icon name="people-outline"></ion-icon>Employee List</a>
             </nav>
           </div>
           <div class="mb-4">
