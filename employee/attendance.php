@@ -144,9 +144,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           </div>
         </div>
       </div>
-      
-        <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
-      <?php endif; ?>
+      <?php if ($message): ?>
+    <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
+  <?php endif; ?>
       <div class="info-box mb-3">
           <strong>Today's Status:</strong><br>
           <?php if ($todayLog): ?>

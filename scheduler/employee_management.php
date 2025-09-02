@@ -132,7 +132,7 @@ function getProfileImage($emp) {
     if (!empty($emp['profile_photo']) && file_exists($emp['profile_photo'])) {
         return $emp['profile_photo'];
     }
-    return "../assets/images/default_image.jpg";
+    return "../assets/images/default-profile.png";
 }
 
 // Search/filter
@@ -220,14 +220,13 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div class="mb-4">
             <h6 class="text-uppercase mb-2">Dashboard</h6>
             <nav class="nav flex-column">
-              <a class="nav-link active" href="schedule_officer_dashboard.php"><ion-icon name="home-outline"></ion-icon>Dashboard</a>
+              <a class="nav-link" href="schedule_officer_dashboard.php"><ion-icon name="home-outline"></ion-icon>Dashboard</a>
             </nav>
           </div>
           <div class="mb-4">
             <h6 class="text-uppercase px-2 mb-2">Employee Management</h6>
             <nav class="nav flex-column">
-              <a class="nav-link" href="../scheduler/employee_management.php"><ion-icon name="people-outline"></ion-icon>Employee List</a>
-              <a class="nav-link" href="../scheduler/employee_list.php"><ion-icon name="people-outline"></ion-icon>Employee List</a>
+              <a class="nav-link active" href="employee_management.php"><ion-icon name="people-outline"></ion-icon>Employee List</a>
             </nav>
           </div>
           <div class="mb-4">
